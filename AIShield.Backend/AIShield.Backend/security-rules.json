@@ -1,0 +1,168 @@
+{
+  "inputRules": [
+    {
+      "ruleId": "PI001",
+      "name": "系统提示词泄露检测",
+      "ruleType": "Input",
+      "matchType": "Regex",
+      "pattern": "(系统提示词|system prompt|隐藏指令|hidden instruction|初始提示词|reveal your system prompt|show system prompt)",
+      "riskLevel": "High",
+      "action": "Block",
+      "enabled": true
+    },
+    {
+      "ruleId": "PI002",
+      "name": "忽略前置指令检测",
+      "ruleType": "Input",
+      "matchType": "Regex",
+      "pattern": "(忽略之前|忽略以上|忽略所有|ignore previous|ignore all previous|forget previous)",
+      "riskLevel": "High",
+      "action": "Block",
+      "enabled": true
+    },
+    {
+      "ruleId": "PI003",
+      "name": "越狱角色检测",
+      "ruleType": "Input",
+      "matchType": "Regex",
+      "pattern": "(DAN|developer mode|开发者模式|越狱模式|jailbreak|不受任何限制|忽略安全策略)",
+      "riskLevel": "High",
+      "action": "Block",
+      "enabled": true
+    },
+    {
+      "ruleId": "PI004",
+      "name": "敏感文件读取诱导检测",
+      "ruleType": "Input",
+      "matchType": "Regex",
+      "pattern": "(\\.env|appsettings\\.json|appsettings\\.Development\\.json|web\\.config|/etc/passwd|id_rsa|读取配置文件|读取服务器文件|显示配置文件)",
+      "riskLevel": "High",
+      "action": "Block",
+      "enabled": true
+    },
+    {
+      "ruleId": "PI005",
+      "name": "命令执行诱导检测",
+      "ruleType": "Input",
+      "matchType": "Regex",
+      "pattern": "(执行命令|运行命令|powershell|cmd\\.exe|rm -rf|whoami|ipconfig|execute_command|delete_file)",
+      "riskLevel": "High",
+      "action": "Block",
+      "enabled": true
+    }
+  ],
+  "outputRules": [
+    {
+      "ruleId": "OD001",
+      "name": "API Key 泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "\\b(sk-[A-Za-z0-9_\\-]{10,}|api[_-]?key\\s*[:=]\\s*['\"]?[A-Za-z0-9_\\-]{8,}['\"]?)",
+      "replacement": "[REDACTED_SECRET]",
+      "riskLevel": "High",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD002",
+      "name": "JWT Token 泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "\\beyJ[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+\\b",
+      "replacement": "[REDACTED_TOKEN]",
+      "riskLevel": "High",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD003",
+      "name": "数据库连接字符串泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "(server\\s*=.*?;.*?(user\\s+id|uid)\\s*=.*?;.*?(password|pwd)\\s*=.*?;?)",
+      "replacement": "[REDACTED_CONNECTION_STRING]",
+      "riskLevel": "High",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD004",
+      "name": "手机号泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "(?<!\\d)1[3-9]\\d{9}(?!\\d)",
+      "replacement": "[REDACTED_PHONE]",
+      "riskLevel": "Medium",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD005",
+      "name": "邮箱泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}",
+      "replacement": "[REDACTED_EMAIL]",
+      "riskLevel": "Medium",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD006",
+      "name": "内网 IP 泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "\\b(10\\.(?:\\d{1,3}\\.){2}\\d{1,3}|172\\.(?:1[6-9]|2\\d|3[0-1])\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3})\\b",
+      "replacement": "[REDACTED_INTERNAL_IP]",
+      "riskLevel": "Medium",
+      "action": "Mask",
+      "enabled": true
+    },
+    {
+      "ruleId": "OD007",
+      "name": "服务器路径泄露检测",
+      "ruleType": "Output",
+      "matchType": "Regex",
+      "pattern": "([a-z]:\\\\(?:[^\\\\/:*?\"<>|\\r\\n]+\\\\?)+|/(?:etc|var|home|root|usr)/[^\\s]+)",
+      "replacement": "[REDACTED_PATH]",
+      "riskLevel": "Medium",
+      "action": "Mask",
+      "enabled": true
+    }
+  ],
+  "toolPolicy": {
+    "dangerousTools": [
+      "execute_command",
+      "delete_file",
+      "read_file",
+      "send_email",
+      "http_post",
+      "database_execute"
+    ],
+    "dangerousArgumentPatterns": [
+      "\\.env",
+      "appsettings\\.json",
+      "appsettings\\.Development\\.json",
+      "/etc/passwd",
+      "C:\\\\Users\\\\",
+      "id_rsa",
+      "\\.pem",
+      "\\.pfx",
+      "rm\\s+-rf"
+    ],
+    "appToolAllowList": {
+      "blog-agent": [
+        "SearchArticle",
+        "GetArticleContent"
+      ],
+      "admin-agent": [
+        "SearchArticle",
+        "GetArticleContent",
+        "UpdateArticle"
+      ],
+      "public-agent": [
+        "SearchArticle"
+      ]
+    }
+  }
+}

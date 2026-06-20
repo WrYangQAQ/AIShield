@@ -41,10 +41,13 @@
 **/fastembed_cache/
 .codex-build/
 
-# Personal/reference documents not intended for public distribution
-docu/*.pdf
-docu/*.doc
-docu/*.docx
+# Keep local research documents out of the public repository.
+docu/*
+!docu/todo.md
+!docu/done.md
+!docu/项目使用说明.md
+!docu/Project-Guide.md
+!docu/接口说明（请求-响应）.md
 
 # IDE and OS
 .idea/

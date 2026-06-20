@@ -1,44 +1,83 @@
 # AIShield
 
-AIShield 是一个面向 AI Agent 应用的安全加固中间件项目，包括：
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-- ASP.NET Core 后端管理与安全接口
-- Vue 3 管理前端
+AIShield is a security middleware for AI Agent applications. It provides an ASP.NET Core backend and a Vue 3 administration frontend for protecting Agent inputs, outputs, tool calls, memory, and RAG workflows.
 
-## 文档
+## Features
 
-- [项目使用说明](docu/项目使用说明.md)
+- Agent registration, authentication, and lifecycle management
+- Input prompt-injection and unsafe-content detection
+- Output filtering and sensitive-data masking
+- Tool-call authorization and parameter inspection
+- Configurable security rules and rule testing
+- Security audit logs, risk trends, and health metrics
+- Memory conflict detection, decay, archive, restore, and synchronization
+- RAG candidate filtering and reranking
+- Multi-turn conversation topic-drift detection
+
+## Documentation
+
 - [Project Guide](docu/Project-Guide.md)
-- [接口说明（请求-响应）](docu/接口说明（请求-响应）.md)
-- [待办事项](docu/todo.md)
-- [完成记录](docu/done.md)
+- [中文项目使用说明](docu/项目使用说明.md)
+- [API Request and Response Reference](docu/接口说明（请求-响应）.md)
+- [Todo](docu/todo.md)
+- [Completed Work](docu/done.md)
 
-## 本地配置
+## Tech Stack
 
-仓库不会保存数据库密码、管理员密码或 API Key。
+- Backend: ASP.NET Core / .NET 9
+- Frontend: Vue 3, TypeScript, Vite, Element Plus
+- Database: SQL Server with Entity Framework Core
 
-1. 复制后端示例配置：
+## Local Configuration
 
-   `AIShield.Backend/AIShield.Backend/appsettings.Development.example.json`
+The repository does not store database passwords, administrator passwords, JWT secrets, or Agent Keys.
 
-   为：
+Copy:
 
-   `AIShield.Backend/AIShield.Backend/appsettings.Development.json`
+```text
+AIShield.Backend/AIShield.Backend/appsettings.Development.example.json
+```
 
-2. 将示例中的数据库连接串、JWT Secret 和管理员密码替换为本地真实值。
+to:
 
-## 启动
+```text
+AIShield.Backend/AIShield.Backend/appsettings.Development.json
+```
 
-后端：
+Replace the placeholders with your local database connection string, JWT secret, and administrator password.
+
+## Run the Application
+
+Start the backend:
 
 ```powershell
 dotnet run --project AIShield.Backend/AIShield.Backend/AIShield.Backend.csproj
 ```
 
-前端：
+Start the frontend:
 
 ```powershell
 cd Aishield.Frontend
 npm install
 npm run dev
 ```
+
+Development URLs:
+
+- Frontend: `http://127.0.0.1:5173`
+- Backend: `http://localhost:5069`
+- Swagger: `http://localhost:5069/swagger`
+
+## Build
+
+```powershell
+dotnet build AIShield.Backend/AIShield.Backend.sln
+cd Aishield.Frontend
+npm run build
+```
+
+## Security
+
+Never commit local configuration, credentials, Agent Keys, or production secrets. Use environment variables or ignored development configuration files for sensitive values.

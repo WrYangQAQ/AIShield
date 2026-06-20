@@ -70,6 +70,87 @@ npm run dev
 - 后端：`http://localhost:5069`
 - Swagger：`http://localhost:5069/swagger`
 
+## 快速接入示例
+
+AIShield 通过 HTTP API 接入，因此可以保护任意语言或框架编写的 Agent。
+
+先在管理页面注册 Agent，复制系统生成的 Agent Key，并通过环境变量保存：
+
+```powershell
+$env:AI_SHIELD_URL="http://localhost:5069"
+$env:AI_SHIELD_AGENT_KEY="你的-Agent-Key"
+```
+
+下面的 JavaScript 示例会在调用 Agent 前拦截用户输入，并在响应用户前过滤模型输出：
+
+```js
+const baseUrl = process.env.AI_SHIELD_URL ?? 'http://localhost:5069'
+const agentKey = process.env.AI_SHIELD_AGENT_KEY
+
+async function inspect(path, content) {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': agentKey
+    },
+    body: JSON.stringify({ content })
+  })
+
+  if (!response.ok) {
+    throw new Error(`AIShield 请求失败：${response.status}`)
+  }
+
+  return response.json()
+}
+
+async function handleUserMessage(userInput) {
+  // 1. 用户输入进入 Agent 或大模型前，先进行安全检查。
+  const inputCheck = await inspect('/api/security/check-input', userInput)
+  if (!inputCheck.allowed) {
+    return `请求已拦截：${inputCheck.reason}`
+  }
+
+  // 替换为你的 OpenAI、LangChain、Semantic Kernel 或 Agent 调用。
+  const modelOutput = await callYourAgentOrModel(
+    inputCheck.processedContent ?? userInput
+  )
+
+  // 2. 模型输出返回用户前，再进行输出过滤。
+  const outputCheck = await inspect('/api/security/check-output', modelOutput)
+  if (!outputCheck.allowed) {
+    return `响应已拦截：${outputCheck.reason}`
+  }
+
+  // 如果 AIShield 执行了脱敏或替换，应使用处理后的内容。
+  return outputCheck.processedContent ?? modelOutput
+}
+```
+
+工具调用也应在真正执行前拦截：
+
+```js
+const toolCheck = await fetch(`${baseUrl}/api/security/check-tool-call`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': agentKey
+  },
+  body: JSON.stringify({
+    toolName: 'send_email',
+    arguments: { recipient: 'user@example.com', content: '你好' }
+  })
+}).then(response => response.json())
+
+if (!toolCheck.allowed) {
+  throw new Error(`工具调用已拦截：${toolCheck.reason}`)
+}
+
+await executeTool()
+```
+
+接入原则很简单：在受保护操作执行前立即调用 AIShield，只有 `allowed` 为 `true` 时才继续；返回 `processedContent` 时，应使用处理后的内容替代原文。
+
 ## 构建
 
 ```powershell
